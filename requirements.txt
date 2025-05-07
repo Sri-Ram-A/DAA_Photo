@@ -1,0 +1,7 @@
+asgiref==3.8.1
+colorama==0.4.6
+Django==5.2
+djangorestframework==3.16.0
+numpy==2.2.5
+sqlparse==0.5.3
+tzdata==2025.2
