@@ -1,31 +1,73 @@
-'use client';
-import Form from 'next/form'
-import { useState } from 'react';
+'use client'
+import React, { useState } from 'react';
 import { postImage } from '@/services/imageService';
-import { useFormStatus } from 'react-dom'
+import { useFormStatus } from 'react-dom';
+import { redirect } from 'next/navigation'
+import './upload.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 export default function Upload() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const status = useFormStatus()
+  const status = useFormStatus();
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!image) return;
+    const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('image_url', image);
-    formData.append('creator', "1"); //shpould replace this with pk will do later
-    postImage(formData)
+    formData.append('creator', '1'); // Placeholder creator ID
+    const res=await postImage(formData);
+    if(!res.ok){
+      toast.error("Error while Posting");
+      redirect('/')
+    }
+    toast.success("Posted Successfully");
+    redirect('/');
   };
 
   return (
-    <Form action={handleSubmit} formEncType='multipart/form-data'>
-      <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" required />
-      <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" required />
-      <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)} required />
-      <button type="submit" disabled={status.pending}>{status.pending ? 'Searching...' : 'Post'}</button>
-    </Form>
+    <div className="upload-container">
+      {/* Background Layers */}
+      <div className="bg bg1"></div>
+      <div className="bg bg2"></div>
+      <div className="bg bg3"></div>
+  
+      {/* Glassmorphic Upload Form */}
+      <div className="upload-form">
+        <h2>Upload Image</h2>
+        <p>Please fill out the form below to upload</p>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          ></textarea>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files?.[0] || null)}
+            required
+          />
+          <button type="submit" disabled={status.pending}>
+            {status.pending ? 'Uploading...' : 'Upload'}
+          </button>
+        </form>
+      </div>
+    </div>
   );
+  
 }

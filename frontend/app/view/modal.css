@@ -1,0 +1,75 @@
+/* modal.css */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  
+  .modal-container {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    max-width: 64rem;
+    width: 100%;
+    margin: 0 1rem;
+    position: relative;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .modal-close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .modal-close-button:hover {
+    color: #d1d5db;
+  }
+  
+  .modal-image-container {
+    flex: 1 1 300px;
+    min-width: 300px;
+    max-width: 400px;
+    height: 400px;
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .modal-text {
+    flex: 2 1 300px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .modal-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .modal-description {
+    color: #e5e7eb;
+    margin-bottom: 1rem;
+  }
+  
+  .modal-meta {
+    font-size: 0.875rem;
+    color: #d1d5db;
+  }
+  
