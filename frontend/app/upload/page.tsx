@@ -5,7 +5,7 @@ import { postImage } from '@/services/imageService';
 import { useFormStatus } from 'react-dom'
 
 
-export default function UploadForm() {
+export default function Upload() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
