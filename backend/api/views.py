@@ -4,6 +4,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from . import serializers
 from . import models
+from . import preprocess
 # Create your views here.
 class HelloWorld(APIView):
     def get(self,request):
@@ -20,6 +21,10 @@ class CreatePost(APIView):
     def post(self, request):
         serializer = serializers.PostsSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            instance=serializer.save()
+            pHash=preprocess.generate_phash(instance.image_url.path)
+            instance.phash = pHash
+            instance.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -12,6 +12,7 @@ interface ImageData {
     image_url: string
     uploaded_at: string
     creator: number
+    phash:string
 }
 
 export default function View() {
@@ -36,6 +37,7 @@ export default function View() {
                     image_url={selectedImage.image_url}
                     uploaded_at={selectedImage.uploaded_at}
                     creator={selectedImage.creator}
+                    phash={selectedImage.phash}
                     onClose={() => setSelectedImage(null)}
                 />
             )}
