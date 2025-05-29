@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MinIO Image Gallery</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+        .gallery-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center;">Image Gallery from '{{ BUCKET_NAME }}'</h1>
+    <div class="gallery">
+        {% for file in files %}
+            <div class="gallery-item">
+                <a href="{% url 'download_file' file %}" target="_blank">
+                    <img src="{% url 'download_file' file %}" alt="{{ file }}">
+                </a>
+                <p>{{ file }}</p>
+            </div>
+        {% empty %}
+            <p>No images found.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
