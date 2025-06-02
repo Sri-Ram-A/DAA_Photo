@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',###
     'api',###
-    'corsheaders',###
+    'corsheaders',###https://pypi.org/project/django-cors-headers/
+    # 'django_minio_backend',###https://pypi.org/project/django-minio-backend/
 ]
 
 MIDDLEWARE = [
@@ -126,13 +127,41 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ###BELOW LINES ARE ADDED BY ME 
-import os
+USE_MINIO=False #most important line
+###__________LOCAL_DJANGO_________(https://medium.com/django-unleashed/working-and-configuring-media-files-in-django-0c2fa7b97a1e)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT =  BASE_DIR / 'media'
+
+###__________CORSHEADERS_________(https://pypi.org/project/django-cors-headers/)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
 # CORS_ORIGIN_ALLOW_ALL = True
-# http://172.17.12.37:3000
+
+
+###__________MINIO_________(https://pypi.org/project/django-minio-backend/)
+if USE_MINIO:
+    from datetime import timedelta
+    from typing import List, Tuple
+    STORAGES = {  # -- ADDED IN Django 5.1
+        "default": {
+            "BACKEND": "django_minio_backend.models.MinioBackend",
+        },
+        "staticfiles": {  # -- ADD THESE LINES FOR STATIC FILES SUPPORT
+            "BACKEND": "django_minio_backend.models.MinioBackendStatic", #python manage.pu collectstatic for DRF
+        },
+    }
+
+    MINIO_ENDPOINT = '127.0.0.1:9000' #Docker running at
+    MINIO_ACCESS_KEY = 'minioadmin' #My MINIO username
+    MINIO_SECRET_KEY = 'minioadmin' #My MINIO username
+
+    MINIO_PUBLIC_BUCKETS = ['media','static'] #Buckets for media and static files
+    MINIO_MEDIA_FILES_BUCKET = 'media'  # replacement for MEDIA_ROOT
+    MINIO_STATIC_FILES_BUCKET = 'static'  # replacement for STATIC_ROOT
+    MINIO_POLICY_HOOKS: List[Tuple[str, dict]] = []
+
+    MINIO_USE_HTTPS=False #Mandatiry parameter
+    MINIO_BUCKET_CHECK_ON_SAVE = True  # Default: Autocreates bucket if not present
+    MINIO_CONSISTENCY_CHECK_ON_START = True #Health & consistency check
