@@ -27,11 +27,6 @@ const nextConfig: NextConfig = {
         hostname: '127.0.0.1',
         port: '9000', //minio server
         pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'unsplash.com',
-        pathname: '/**',
       }
     ],
   }

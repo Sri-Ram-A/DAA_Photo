@@ -7,24 +7,21 @@ from django.core.files.storage import FileSystemStorage
 # lets us explicitly set upload path and filename
 USE_MINIO=getattr(settings,"USE_MINIO",False)
 storage=MinioBackend(bucket_name='media', replace_existing=True) if USE_MINIO else FileSystemStorage()
-#🌟✨observation:
-#if USE_MINIO=True,every image_url in every Posts object = http://127.0.0.1:9000/media/images/wallhaven-1.jpg
-#if USE_MINIO=False every image_url in every Posts object = http://127.0.0.1:8000/media/images/wallhaven-1_-_minio.jpg
-#suppose image names are same in local/media/ as well as minio/media then they will be rendered irrespective of value of USE_MINIO
+# 🌟✨observation:
+# if USE_MINIO=True,every image_url in every Posts object = http://127.0.0.1:9000/media/images/wallhaven-1.jpg
+# if USE_MINIO=False every image_url in every Posts object = http://127.0.0.1:8000/media/images/wallhaven-1_-_minio.jpg
+# suppose image names are same in local/media/ as well as minio/media then they will be rendered irrespective of value of USE_MINIO
 
 def upload_to(instance, filename):
     return f'images/{filename}' 
 
 class Posts(models.Model):
-    creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="listings")
-    title = models.CharField(
-        max_length=80, blank=False, null=False)
+    creator =  models.CharField(max_length=80, blank=False, null=False)
+    title = models.CharField(max_length=80, blank=False, null=False)
     description = models.TextField()
     image_url = models.ImageField(
         upload_to=upload_to,
         blank=True, null=True,
-        #remove this below argument if you dont want to use MinIO
         storage=storage
         )
     uploaded_at = models.DateTimeField(auto_now_add=True)

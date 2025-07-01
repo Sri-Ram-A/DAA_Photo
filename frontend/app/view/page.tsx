@@ -52,6 +52,7 @@ export default function View() {
                     width: "100%",
                     maxWidth: "1200px",
                     margin: "2rem auto",
+                    overflowY: "auto",
                     
                 }}
             >

@@ -3,35 +3,38 @@ import React, { useState } from 'react';
 import { postImage } from '@/services/imageService';
 import { useRouter } from 'next/navigation';
 import './upload.css';
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 
 
 export default function Upload() {
   const [title, setTitle] = useState('');
+  const [creator, setCreator] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const router = useRouter();
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (!image) return;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!image) return;
+    setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('image_url', image);
+    formData.append('creator', creator);
 
-  const formData = new FormData();
-  formData.append('title', title);
-  formData.append('description', description);
-  formData.append('image_url', image);
-  formData.append('creator', '1');
+    const res = await postImage(formData);
+    if (!res.ok) {
+      setIsSubmitting(false);
+      router.push('/view');
 
-  const res = await postImage(formData);
-  if (!res.ok) {
-    toast.error("Error while Posting");
-    return;
-  }
+      return;
+    }
 
-  toast.success("Posted Successfully");
-  router.push('/');  // 👈 replaces redirect('/')
-};
+    router.push('/view');
+  };
 
 
   return (
@@ -53,6 +56,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
+          <input
+            type="text"
+            placeholder="Creator"
+            value={creator}
+            onChange={(e) => setCreator(e.target.value)}
+            required
+          />
           <textarea
             placeholder="Description"
             value={description}
@@ -65,8 +75,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             onChange={(e) => setImage(e.target.files?.[0] || null)}
             required
           />
-          <button type="submit">
-            Upload
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Uploading..." : "Upload"}
           </button>
 
         </form>
