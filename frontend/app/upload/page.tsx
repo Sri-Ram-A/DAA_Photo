@@ -3,39 +3,36 @@ import React, { useState } from 'react';
 import { postImage } from '@/services/imageService';
 import { useRouter } from 'next/navigation';
 import './upload.css';
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function Upload() {
   const [title, setTitle] = useState('');
+  const [creator, setCreator] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [processType, setProcessType] = useState(''); // New state for process type
+  const [processingType, setProcessingType] = useState('none'); // 🔧 NEW STATE
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!image) return;
-    if (!processType) {
-      toast.error("Please select a process type");
-      return;
-    }
-
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('image_url', image);
-    formData.append('creator', '1');
-    formData.append('process_type', processType); // Add process type to form data
+    formData.append('creator', creator);
+    formData.append('processing_type', processingType); // 🔧 NEW FIELD
 
     const res = await postImage(formData);
     if (!res.ok) {
-      toast.error("Error while Posting");
+      setIsSubmitting(false);
+      router.push('/view');
       return;
     }
 
-    toast.success("Posted Successfully");
-    router.push('/');
+    router.push('/view');
   };
 
   return (
@@ -57,32 +54,36 @@ export default function Upload() {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
+          <input
+            type="text"
+            placeholder="Creator"
+            value={creator}
+            onChange={(e) => setCreator(e.target.value)}
+            required
+          />
           <textarea
             placeholder="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
           ></textarea>
-          
-          {/* New Process Type Selection */}
           <select
-            value={processType}
-            onChange={(e) => setProcessType(e.target.value)}
+            value={processingType}
+            onChange={(e) => setProcessingType(e.target.value)}
             required
           >
-            <option value="">Select Process Type</option>
+            <option value="none">No Processing</option>
             <option value="grayscale">Grayscale</option>
-            <option value="resolution">Resolution</option>
+            <option value="resolution">High Resolution</option>
           </select>
-          
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setImage(e.target.files?.[0] || null)}
             required
           />
-          <button type="submit">
-            Upload
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Uploading..." : "Upload"}
           </button>
         </form>
       </div>

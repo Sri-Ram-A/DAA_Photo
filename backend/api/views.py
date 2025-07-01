@@ -2,169 +2,115 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from . import serializers
-from . import models
-from . import preprocess
-from rq import Queue
-from redis import Redis
-import os
-import logging
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Posts
-from .serializers import PostSerializer
-from rq import Queue
-from redis import Redis
-import os
-import logging
+from rest_framework.permissions import AllowAny
+from django.core.files.base import ContentFile
+from django.conf import settings
+from datetime import datetime
+from minio import Minio
 
-# Redis connection
-redis_conn = Redis(host='redis', port=6379, db=0)
-grayscale_queue = Queue('grayscale', connection=redis_conn)
-resolution_queue = Queue('resolution', connection=redis_conn)
-logger = logging.getLogger(__name__)
+from . import serializers, models, preprocess, worker_queue
+
 
 class HelloWorld(APIView):
     def get(self, request):
         return Response("Hello To My project")
 
+
 class CreatePost(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
-        images = models.Posts.objects.all()
-        serializer = serializers.PostsSerializer(images, many=True, context={'request': request})
+        """
+        Return all uploaded images.
+        """
+        posts = models.Posts.objects.all().order_by('-id')
+        serializer = serializers.PostsSerializer(posts, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        logger.debug(f"Received POST data: {request.data}")
-        
-        serializer = serializers.PostsSerializer(data=request.data)
-        if serializer.is_valid():
-            # Get process_type before saving
-            process_type = request.data.get('process_type')
-            
-            # Validate process_type
-            if process_type not in ['grayscale', 'resolution']:
-                return Response(
-                    {"error": "Invalid process_type. Must be 'grayscale' or 'resolution'"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Save the instance
-            instance = serializer.save()
-            uploaded_file = request.FILES['image_url']
+        """
+        Upload and optionally process an image.
+        """
+        processing_type = request.data.get("processing_type", "none")
+        uploaded_file = request.FILES.get('image_url')
 
-            try:
-                # Save the file to the shared volume for worker processing
-                file_path = os.path.join('/shared/uploads', uploaded_file.name)
-                os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                
-                with open(file_path, 'wb') as f:
-                    uploaded_file.seek(0)
-                    f.write(uploaded_file.read())
+        if not uploaded_file:
+            return Response({"error": "No image uploaded"}, status=400)
 
-                # Generate pHash
-                uploaded_file.seek(0)
-                file_bytes = uploaded_file.read()
-                pHash = preprocess.generate_phash(file_bytes)
-                instance.phash = pHash
-                instance.save()
+        file_bytes = uploaded_file.read()
 
-                # Enqueue the task to the appropriate queue
-                if process_type == 'grayscale':
-                    grayscale_queue.enqueue('worker.process_image', file_path, process_type)
-                elif process_type == 'resolution':
-                    resolution_queue.enqueue('worker.process_image', file_path, process_type)
+        # Process image if needed
+        if processing_type != "none":
+            processed, result = worker_queue.send_to_worker(processing_type, file_bytes, uploaded_file.name)
+            if not processed:
+                return Response({"error": f"Processing failed: {result}"}, status=500)
+            file_bytes = processed
+            worker_queue.release_worker(processing_type, result)
 
-                logger.info(f"Successfully queued {process_type} processing for {file_path}")
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-                
-            except Exception as e:
-                logger.error(f"Error processing upload: {e}")
-                instance.delete()  # Clean up if processing fails
-                return Response(
-                    {"error": "Failed to process upload"}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        
-        logger.error(f"Serializer errors: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Generate pHash
+        pHash = preprocess.generate_phash(file_bytes)
 
-# Alternative simplified view - you can use this instead of CreatePost if you prefer
-class ImageUploadView(APIView):
-      def post(self, request):
-          logger.debug(f"Received POST data: {request.data}")
-          serializer = PostSerializer(data=request.data)
-          if serializer.is_valid():
-              post = serializer.save()
-              redis_conn = Redis(host='redis', port=6379, db=0)
-              queue = Queue(post.process_type, connection=redis_conn)
-              queue.enqueue('worker.process_image', post.image_url.path, post.process_type)
-              return Response(serializer.data, status=status.HTTP_201_CREATED)
-          logger.error(f"Serializer errors: {serializer.errors}")
-          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Check for duplicates
+        duplicates = models.Posts.objects.filter(phash=pHash)
+        duplicate_group = 1 if not duplicates.exists() else 2
 
-      def get(self, request):
-          posts = Posts.objects.all()
-          serializer = PostSerializer(posts, many=True)
-          return Response(serializer.data, status=status.HTTP_200_OK)
-      parser_classes = [MultiPartParser, FormParser]
-        
-      def get(self, request):
-            """Get all images"""
-            try:
-                images = models.Posts.objects.all()
-                serializer = serializers.PostSerializer(images, many=True, context={'request': request})
-                print(serializer.data)  # Debugging line to check data
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Exception as e:
-                logger.error(f"Error fetching images: {e}")
-                return Response({"error": "Failed to fetch images"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-      def post(self, request):
-            logger.debug(f"Received POST data: {request.data}")
-            
-            serializer = serializers.PostSerializer(data=request.data)
-            if serializer.is_valid():
-                post = serializer.save()
-                uploaded_file = request.FILES['image_url']
-                
-                try:
-                    # Save file to shared volume for worker processing (same as CreatePost)
-                    file_path = os.path.join('/shared/uploads', uploaded_file.name)
-                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                    
-                    # Write file to shared volume
-                    with open(file_path, 'wb') as f:
-                        uploaded_file.seek(0)
-                        f.write(uploaded_file.read())
+        # Generate unique filename using timestamp
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        original_name = uploaded_file.name.rsplit('.', 1)[0]
+        extension = uploaded_file.name.rsplit('.', 1)[-1]
+        new_filename = f"{original_name}_{processing_type}_{timestamp}.{extension}"
 
-                    # Generate pHash
-                    uploaded_file.seek(0)
-                    file_bytes = uploaded_file.read()
-                    pHash = preprocess.generate_phash(file_bytes)
-                    post.phash = pHash
-                    post.save()
-                    
-                    # Get the correct queue based on process_type
-                    queue_name = post.process_type
-                    queue = Queue(queue_name, connection=redis_conn)
-                    
-                    # Use the shared volume path for worker processing
-                    queue.enqueue('worker.process_image', file_path, post.process_type)
-                    logger.info(f"Queued {post.process_type} processing for {file_path}")
-                    
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-                    
-                except Exception as e:
-                    logger.error(f"Error queuing task: {e}")
-                    post.delete()  # Clean up if processing fails
-                    return Response(
-                        {"error": "Failed to queue processing task"}, 
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
-            
-            logger.error(f"Serializer errors: {serializer.errors}")
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Save image to MinIO
+        image_field = ContentFile(file_bytes)
+        image_field.name = new_filename
+
+        # Save Post in DB
+        post = models.Posts.objects.create(
+            creator=request.data.get("creator"),
+            title=request.data.get("title"),
+            description=request.data.get("description"),
+            image_url=image_field,
+            phash=pHash,
+            processing_type=processing_type,
+            duplicate_group=duplicate_group
+        )
+
+        serializer = serializers.PostsSerializer(post)
+        return Response(serializer.data, status=201)
+
+
+class ClearAllData(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):  # Temporary GET support for browser access
+        return self.delete(request)
+
+    def delete(self, request):
+        if not settings.USE_MINIO:
+            return Response({"error": "MinIO not enabled"}, status=400)
+
+        client = Minio(
+            settings.MINIO_ENDPOINT,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY,
+            secure=settings.MINIO_USE_HTTPS
+        )
+
+        bucket = settings.MINIO_MEDIA_FILES_BUCKET
+
+        try:
+            objects = client.list_objects(bucket, recursive=True)
+            delete_objects = [obj.object_name for obj in objects]
+
+            if delete_objects:
+                client.remove_objects(bucket, delete_objects)
+
+            models.Posts.objects.all().delete()
+
+            return Response(
+                {"message": f"✅ Cleared {len(delete_objects)} MinIO files and all DB posts."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

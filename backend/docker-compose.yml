@@ -1,0 +1,31 @@
+# Updated docker-compose.yml with 2 workers each for grayscale and resolution
+version: '3.8'
+
+services:
+  grayscale_worker_1:
+    build:
+      context: ./workers/grayscale
+    ports:
+      - "8001:8001"
+    container_name: grayscale_worker_1
+
+  grayscale_worker_2:
+    build:
+      context: ./workers/grayscale
+    ports:
+      - "8003:8001"
+    container_name: grayscale_worker_2
+
+  resolution_worker_1:
+    build:
+      context: ./workers/resolution
+    ports:
+      - "8002:8002"
+    container_name: resolution_worker_1
+
+  resolution_worker_2:
+    build:
+      context: ./workers/resolution
+    ports:
+      - "8004:8002"
+    container_name: resolution_worker_2

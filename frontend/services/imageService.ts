@@ -1,5 +1,4 @@
 export const BASE_API_URL = 'http://127.0.0.1:8000/api/images/';
-
 // You can do same functionality without async function also
 export const postImage = async (formData: FormData) => {
   try {
@@ -23,15 +22,17 @@ export const postImage = async (formData: FormData) => {
   }
 };
 
-  import axios from 'axios';
+export async function getImages() {
+  const res = await fetch("http://localhost:8000/api/images/");
+  if (!res.ok) {
+    throw new Error("Failed to fetch images");
+  }
 
-  export const getImages = async () => {
-      try {
-          const response = await axios.get('http://django:8000/api/images/');
-          return response.data;
-      } catch (error) {
-          console.error('Error fetching images:', error);
-          throw error;
-      }
-  };
+  const data = await res.json();
+
+  // Log and check structure
+  console.log("Fetched data:", data);
+
+  return data;  // Make sure this is an array
+}
 

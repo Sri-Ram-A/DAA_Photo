@@ -29,10 +29,10 @@ export default function HeroSection() {
                 }}
             >
                 <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
-                    Roja Vai Thaalatum
+                    Cloud Image Orchestrator
                 </h1>
                 <p style={{ fontSize: "1rem", color: "#555" }}>
-                    Ennakendru etravale ponnagai evalo,idhayathil kair katti<br />Salaam Rocky bhai.
+                    The platform for your images - hashing , huffman , housekeeping and more<br />
                 </p>
             </div>
 
