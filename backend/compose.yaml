@@ -1,13 +1,125 @@
 services:
+  django:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_volume:/shared
+    depends_on:
+      - redis
+      - minio
+    environment:
+      - USE_MINIO=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=django-backend-dev
+      - MEDIA_ROOT=/shared/uploads
+      - MEDIA_URL=/media/
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - django
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
   minio:
     image: minio/minio:latest
-    container_name: minio
     ports:
-      - "9000:9000" # Host port : Container port
+      - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - ./minio_data:/data # Host folder : Container folder
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
     command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  grayscale_worker_1:
+    build:
+      context: .
+      dockerfile: dockerfile.worker
+    volumes:
+      - shared_volume:/shared
+    depends_on:
+      - redis
+      - minio
+    environment:
+      - CONTAINER_NAME=grayscale_worker_1
+      - QUEUE_NAME=grayscale
+      - USE_MINIO=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=django-backend-dev
+
+  grayscale_worker_2:
+    build:
+      context: .
+      dockerfile: dockerfile.worker
+    volumes:
+      - shared_volume:/shared
+    depends_on:
+      - redis
+      - minio
+    environment:
+      - CONTAINER_NAME=grayscale_worker_2
+      - QUEUE_NAME=grayscale
+      - USE_MINIO=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=django-backend-dev
+
+  resolution_worker_1:
+    build:
+      context: .
+      dockerfile: dockerfile.worker
+    volumes:
+      - shared_volume:/shared
+    depends_on:
+      - redis
+      - minio
+    environment:
+      - CONTAINER_NAME=resolution_worker_1
+      - QUEUE_NAME=resolution
+      - USE_MINIO=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=django-backend-dev
+
+  resolution_worker_2:
+    build:
+      context: .
+      dockerfile: dockerfile.worker
+    volumes:
+      - shared_volume:/shared
+    depends_on:
+      - redis
+      - minio
+    environment:
+      - CONTAINER_NAME=resolution_worker_2
+      - QUEUE_NAME=resolution
+      - USE_MINIO=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=django-backend-dev
+
+volumes:
+  shared_volume:
+  minio_data:

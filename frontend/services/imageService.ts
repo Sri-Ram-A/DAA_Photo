@@ -23,14 +23,15 @@ export const postImage = async (formData: FormData) => {
   }
 };
 
-export const getImages = async () => {
-  try {
-    const res = await fetch(BASE_API_URL);
-    const data = await res.json();
-    console.log('Received:', data);
-    return data;
-  } catch (err) {
-    console.error('Fetching images failed due to:', err);
-    throw err;
-  }
-};
+  import axios from 'axios';
+
+  export const getImages = async () => {
+      try {
+          const response = await axios.get('http://django:8000/api/images/');
+          return response.data;
+      } catch (error) {
+          console.error('Error fetching images:', error);
+          throw error;
+      }
+  };
+

@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+                  protocol: 'http',
+                  hostname: 'localhost',
+                  port: '9000',
+                  pathname: '/django-backend-dev/**',
+              },
+      {
         protocol: 'http',
         hostname: 'loacalhost',
         port: '8000',
@@ -31,6 +37,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'minio',
+        port: '9000', //minio server
         pathname: '/**',
       }
     ],

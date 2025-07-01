@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processor</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function ImageProcessor() {
+            const [files, setFiles] = React.useState([]);
+            const [processType, setProcessType] = React.useState('grayscale');
+            const [response, setResponse] = React.useState(null);
+
+            const handleFileChange = (e) => {
+                setFiles(e.target.files);
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                for (let file of files) {
+                    formData.append('image_url', file);
+                    formData.append('title', file.name);
+                    formData.append('description', `Processed ${processType} image`);
+                    formData.append('process_type', processType);
+
+                    try {
+                        const res = await axios.post('http://localhost:8000/api/images/', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        setResponse(res.data);
+                    } catch (err) {
+                        console.error(err);
+                        setResponse({ error: 'Failed to upload images' });
+                    }
+                }
+            };
+
+            return (
+                <div className="container mx-auto p-4">
+                    <h1 className="text-2xl font-bold mb-4">Image Processor</h1>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium">Select Images</label>
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="mt-1 block w-full"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Process Type</label>
+                            <select
+                                value={processType}
+                                onChange={(e) => setProcessType(e.target.value)}
+                                className="mt-1 block w-full"
+                            >
+                                <option value="grayscale">Grayscale</option>
+                                <option value="resolution">Resolution Enhancement</option>
+                            </select>
+                        </div>
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white px-4 py-2 rounded"
+                        >
+                            Process Images
+                        </button>
+                    </form>
+                    {response && (
+                        <div className="mt-4">
+                            <pre>{JSON.stringify(response, null, 2)}</pre>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ImageProcessor />, document.getElementById('root'));
+    </script>
+</body>
+</html>
