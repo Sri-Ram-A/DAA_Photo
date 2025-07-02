@@ -12,16 +12,21 @@ worker_pool = {
 
 lock = threading.Lock()
 
-def assign_worker(process_type):
+def assign_worker(process_type, wait_timeout=60):
     """
-    Assign a free worker for the given process type.
+    Wait until a free worker is available or timeout occurs.
     """
-    with lock:
-        for port, status in worker_pool[process_type].items():
-            if status == "free":
-                worker_pool[process_type][port] = "busy"
-                return port
-    return None  # No free worker available
+    start_time = time.time()
+    while time.time() - start_time < wait_timeout:
+        with lock:
+            for port, status in worker_pool[process_type].items():
+                if status == "free":
+                    worker_pool[process_type][port] = "busy"
+                    return port
+        time.sleep(1) 
+
+    return None  
+
 
 def release_worker(process_type, port):
     """
