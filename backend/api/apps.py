@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django_minio_backend import MinioBackend ###
+from loguru import logger
 
 class ApiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -9,7 +10,6 @@ class ApiConfig(AppConfig):
         minio = MinioBackend()
         result = minio.is_minio_available()
         if result:
-            print("✅ MinIO is available.")
+            logger.info("✅ MinIO is available.")
         else:
-            print("❌ MinIO is not available. Using File system storage")
-            print(result.details)
+            logger.info(f"❌ MinIO is not available. Using File system storage\n{result.details}")

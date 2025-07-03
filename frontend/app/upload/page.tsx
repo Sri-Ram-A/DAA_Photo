@@ -28,7 +28,7 @@ export default function Upload() {
     const res = await postImage(formData);
     if (!res.ok) {
       setIsSubmitting(false);
-      router.push('/view');
+      router.push('/');
 
       return;
     }

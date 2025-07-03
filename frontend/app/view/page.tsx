@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import { getImages } from "@/services/imageService"
-import HeroSection from "../components/HeroSection"
-import Modal from "../components/Modal";
+import HeroSection from "../../components/HeroSection"
+import Modal from "../../components/Modal";
 
 interface ImageData {
     id: number

@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'rest_framework',###
     'api',###
     'corsheaders',###https://pypi.org/project/django-cors-headers/
-    'django_minio_backend',###https://pypi.org/project/django-minio-backend/
-    # if you remove above line,inspite of running minio server,it will not work
 ]
 
 MIDDLEWARE = [
@@ -128,7 +126,12 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ### BELOW LINES ARE ADDED BY ME 
-USE_MINIO=True # most important line
+    ###__________LOCAL_DJANGO_________(https://medium.com/django-unleashed/working-and-configuring-media-files-in-django-0c2fa7b97a1e)
+    
+MEDIA_URL = '/media/'
+MEDIA_ROOT =  BASE_DIR / 'media'
+
+USE_MINIO=False # most important line
 
 
 ###__________CORSHEADERS_________(https://pypi.org/project/django-cors-headers/)
@@ -141,6 +144,9 @@ CORS_ALLOWED_ORIGINS = [
 
 ###__________MINIO_________(https://pypi.org/project/django-minio-backend/)
 if USE_MINIO:
+    INSTALLED_APPS.append('django_minio_backend')###https://pypi.org/project/django-minio-backend/
+    # if you remove above line,inspite of running minio server,it will not work
+    DEFAULT_FILE_STORAGE = 'django_minio_backend.models.MinioBackend'
     from typing import List, Tuple
     STORAGES = {  # -- ADDED IN Django 5.1
         "default": {
@@ -163,7 +169,4 @@ if USE_MINIO:
     MINIO_USE_HTTPS=False #Mandatiry parameter
     MINIO_BUCKET_CHECK_ON_SAVE = True  # Default: Autocreates bucket if not present
     MINIO_CONSISTENCY_CHECK_ON_START = True #Health & consistency check
-else:
-    ###__________LOCAL_DJANGO_________(https://medium.com/django-unleashed/working-and-configuring-media-files-in-django-0c2fa7b97a1e)
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT =  BASE_DIR / 'media'
+

@@ -26,6 +26,7 @@ class Posts(models.Model):
         )
     uploaded_at = models.DateTimeField(auto_now_add=True)
     phash = models.CharField(max_length=16, blank=True, null=True)
+    meta = models.TextField(null=False,default="{}")
 
     def __str__(self):
-        return f"{self.title} by {self.creator.username}"
+        return f"{self.title} by {self.creator}"

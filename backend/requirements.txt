@@ -7,3 +7,4 @@ numpy==2.2.5
 opencv-python-headless==4.11.0.86
 pillow==11.2.1
 gunicorn
+loguru
