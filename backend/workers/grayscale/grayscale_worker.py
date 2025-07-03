@@ -11,7 +11,7 @@ app = FastAPI()
 @app.post("/process/grayscale")
 async def grayscale_image(file: UploadFile = File(...)):
     # Simulate real-world processing delay
-    time.sleep(random.randint(10, 30))
+    time.sleep(random.randint(1, 3))
 
     contents = await file.read()
     np_arr = np.frombuffer(contents, np.uint8)

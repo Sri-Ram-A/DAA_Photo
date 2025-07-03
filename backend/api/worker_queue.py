@@ -12,7 +12,7 @@ worker_pool = {
 
 lock = threading.Lock()
 
-def assign_worker(process_type, wait_timeout=60):
+def assign_worker(process_type, wait_timeout=600):
     """
     Wait until a free worker is available or timeout occurs.
     """
