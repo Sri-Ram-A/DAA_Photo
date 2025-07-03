@@ -1,8 +1,11 @@
 import cv2
 import numpy as np
 from scipy.fftpack import dct
-from  . import huffman
+from  . import huffman,binary_tree
 from loguru import logger
+import pickle
+
+TREE_PKL_FILE_LOC="tree.pkl"
 
 def dct2(img):
     return dct(dct(img.T, norm='ortho').T, norm='ortho')
@@ -41,8 +44,24 @@ def image_encoding(img):
         "r_cts": r_cts,
         "shape": b.shape
     }
+
 def image_decoding(b_bitstream , g_bitstream , r_bitstream , b_cts, g_cts, r_cts,shape):
     b  = huffman.decompress_image(b_bitstream , b_cts, shape)
     g  = huffman.decompress_image(g_bitstream , g_cts, shape)
     r  = huffman.decompress_image(r_bitstream , r_cts, shape)
     return cv2.merge([b , g , r])
+
+def save_tree(tree, filename=TREE_PKL_FILE_LOC):
+    with open(filename, "wb") as f:
+        pickle.dump(tree, f)
+    logger.info("✅ Tree saved to file!")
+
+def load_tree(filename=TREE_PKL_FILE_LOC): 
+    try:
+        with open(filename, "rb") as f:
+            tree = pickle.load(f)
+        logger.success("✅ Tree loaded from file!")
+        return tree
+    except FileNotFoundError:
+        logger.error("⚠️ Tree file not found. Creating new tree.")
+        return binary_tree.BinarySearchTree()

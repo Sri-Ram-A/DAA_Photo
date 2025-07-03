@@ -6,21 +6,16 @@ export const postImage = async (formData: FormData) => {
       method: 'POST',
       body: formData,
     });
-    
     if (!res.ok) {
-      const errorData = await res.json();
-      console.error('Upload failed:', errorData);
-      throw new Error(`Upload failed: ${JSON.stringify(errorData)}`);
+      return res;
     }
-    
-    const data = await res.json();
-    console.log('Uploaded:', data);
-    return data;
-  } catch (err) {
-    console.error('Upload failed due to:', err);
-    throw err;
+    return res;
+  } catch (error) {
+    console.error('Network error:', error);
+    throw error; // This will be caught in your handleSubmit
   }
 };
+
 
 export const getImages = async () => {
   try {

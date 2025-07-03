@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react';
-import { postImage } from '@/services';
+import { Toaster, toast } from 'sonner'
 import { useRouter } from 'next/navigation';
 import { Upload as UploadIcon, Image as ImageIcon, User, FileText, X } from 'lucide-react';
+import { postImage } from '@/services';
 
 export default function Upload() {
   const [title, setTitle] = useState('');
@@ -16,6 +17,8 @@ export default function Upload() {
   const router = useRouter();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImage(file);
@@ -31,7 +34,7 @@ export default function Upload() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!image) return;
-    
+
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('title', title);
@@ -40,20 +43,47 @@ export default function Upload() {
     formData.append('creator', creator);
     formData.append('processing_type', processingType);
 
-    const res = await postImage(formData);
-    setIsSubmitting(false);
-    
-    if (res.ok) {
-      router.push('/view');
-    }
-    router.push('/view');
+    try {
+      const res = await postImage(formData);
 
+      if (res.ok) {
+        const data = await res.json();
+        toast.success('Image uploaded successfully!', {
+          description: 'Your image has been added to the gallery'
+        });
+        router.push('/');
+      } else {
+        // Handle specific error cases
+        const errorData = await res.json().catch(() => ({})); // Fallback if no JSON
+
+        if (res.status === 403) {
+          toast.error('Duplicate Image Found', {
+            description: errorData.error || 'This image already exists in our system',
+            action: {
+              label: 'View Gallery',
+              onClick: () => router.push('/view')
+            }
+          });
+        } else {
+          toast.error('Upload Failed', {
+            description: errorData.error || 'An unexpected error occurred'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Network Error', {
+        description: 'Failed to connect to the server'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden flex justify-center items-center p-4">
       {/* Animated Background Layers */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center opacity-0 animate-fadeImages"
         style={{
           backgroundImage: "url('/bg1.jpg')",
@@ -61,7 +91,7 @@ export default function Upload() {
           animationDuration: '15s'
         }}
       />
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center opacity-0 animate-fadeImages"
         style={{
           backgroundImage: "url('/bg2.jpg')",
@@ -69,7 +99,7 @@ export default function Upload() {
           animationDuration: '15s'
         }}
       />
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center opacity-0 animate-fadeImages"
         style={{
           backgroundImage: "url('/bg3.jpeg')",
@@ -87,9 +117,9 @@ export default function Upload() {
         <div className="md:w-1/2 p-8 flex flex-col items-center justify-center bg-white/5">
           {preview ? (
             <div className="relative w-full h-full flex items-center justify-center">
-              <img 
-                src={preview} 
-                alt="Preview" 
+              <img
+                src={preview}
+                alt="Preview"
                 className="max-h-[70vh] max-w-full object-contain rounded-lg border border-white/20"
               />
               <button
@@ -109,9 +139,9 @@ export default function Upload() {
                 Drag & drop an image here, or click to browse files
               </p>
               <label className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg cursor-pointer transition-colors border border-white/30">
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={handleImageChange}
                   className="hidden"
                 />
@@ -125,7 +155,7 @@ export default function Upload() {
         {/* Right Side - Form */}
         <div className="md:w-1/2 p-8 flex flex-col bg-white/10 backdrop-blur-sm">
           <h2 className="text-2xl font-bold text-white mb-6">Upload Details</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-white/80">Title</label>
@@ -181,11 +211,10 @@ export default function Upload() {
               <button
                 type="submit"
                 disabled={isSubmitting || !image}
-                className={`w-full py-3 px-6 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors ${
-                  isSubmitting || !image
-                    ? 'bg-gray-400/30 text-white/50 cursor-not-allowed'
-                    : 'bg-blue-500/90 hover:bg-blue-600/90 text-white shadow-md'
-                }`}
+                className={`w-full py-3 px-6 rounded-lg font-medium flex items-center justify-center space-x-2 transition-colors ${isSubmitting || !image
+                  ? 'bg-gray-400/30 text-white/50 cursor-not-allowed'
+                  : 'bg-blue-500/90 hover:bg-blue-600/90 text-white shadow-md'
+                  }`}
               >
                 {isSubmitting ? (
                   <>
