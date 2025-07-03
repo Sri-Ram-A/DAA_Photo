@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.http import HttpResponse,FileResponse
+from django.core.files.base import ContentFile
 from django.apps import apps
 tree = apps.get_app_config("api").tree
 import cv2
@@ -10,6 +11,7 @@ import numpy as np
 import json
 
 from processing import preprocess
+from processing import producer
 from . import serializers,models
 
 
@@ -46,57 +48,74 @@ class CreatePost(APIView):
         serializer = serializers.PostsSerializer(data=request.data) #reuqest.data is a django QueryDict
         # <QueryDict: {'title': ['etag'], 'description': ['Electric Guitar'], 'creator': ['electric wizard'],
         # 'processing_type': ['resolution'], 'image_url': [<InMemoryUploadedFile: Screenshot 2025-05-24 113022.png (image/png)>]}>
+        
         if serializer.is_valid():
-            instance=serializer.save()
-            uploaded_file = request.FILES['image_url'] # Just extracts image name 
-            uploaded_file.seek(0)
-            file_bytes = uploaded_file.read()  # Read into memory
-            #  Convert bytes to numpy array
-            nparr = np.frombuffer(file_bytes, np.uint8)
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            if img is None:
-                raise ValueError("OpenCV failed to decode image")
-            # niw generate hash
-            pHash = preprocess.generate_phash(img)
-            instance.phash = pHash
-            print("Generated pHash:",pHash)
-            key = tree.search(pHash)
-            if key == None:
-                print(f"🔍 Key {pHash} not found in tree.")
-                #now store in tree 
+            instance = serializer.save()
+            try:
+                uploaded_file = request.FILES['image_url']
+                uploaded_file.seek(0)
+                file_bytes = uploaded_file.read()
+
+                if instance.processing_type != "none":
+                    processed, result = producer.send_to_worker(instance.processing_type, file_bytes, uploaded_file.name)
+                    if not processed:
+                        raise ValueError(f"Processing failed: {result}")
+                    file_bytes = processed
+                    producer.release_worker(instance.processing_type, result)
+
+                # Save processed image
+                image_field = ContentFile(file_bytes)
+                image_field.name =  uploaded_file.name + instance.processing_type
+                instance.image_url = image_field
+
+                # Convert to numpy
+                nparr = np.frombuffer(file_bytes, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+                # Generate pHash
+                pHash = preprocess.generate_phash(img)
+                instance.phash = pHash
+                print("Generated pHash:", pHash)
+
+                key = tree.search(pHash)
+                if key is not None:
+                    print(f"‼️ Key {pHash} already found in tree.")
+                    raise ValueError("image existing")
+
+                # Insert in tree
                 meta_dict = {
-                "pHash": pHash,
-                "title": instance.title,
-                "description": instance.description,
-                "creator": instance.creator,
-                "uploaded_at": instance.uploaded_at.isoformat(),  # 💡 convert datetime to string!
-                "processing_type": instance.processing_type,
+                    "pHash": pHash,
+                    "title": instance.title,
+                    "description": instance.description,
+                    "creator": instance.creator,
+                    "uploaded_at": instance.uploaded_at.isoformat(),
+                    "processing_type": instance.processing_type,
                 }
                 tree.insert(pHash, meta_dict)
                 preprocess.save_tree(tree)
-                
 
-                #niw generate cts and bitstreams
-                encoded_dict=preprocess.image_encoding(img)
-                instance.meta=json.dumps(encoded_dict)
-                if instance.processing_type == "grayscale":
-                    print("Do grayscale things")
-                elif instance.processing_type == "resolution":
-                    print("Do resolution enhancement")
-                else:
-                    print("No extra processing")
+                # Encode and save meta
+                encoded_dict = preprocess.image_encoding(img)
+                instance.meta = json.dumps(encoded_dict)
+
                 instance.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
+
+            except Exception as e:
+                # Clean up on any failure
                 instance.delete()
-                print(f"‼️ Key {pHash} already found in tree.")
-                return Response({"error":"image existing"},status=status.HTTP_403_FORBIDDEN)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                print(f"❌ Error occurred, instance deleted: {e}")
+                if str(e) == "image existing":
+                    return Response({"error": "image existing"}, status=status.HTTP_403_FORBIDDEN)
+                else:
+                    return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VisualizeTreeDatabase(APIView):
     def get(self,request):
         filename=tree.visualize()
-        
         # Open the PDF file in binary mode
         file_handle = open(filename, 'rb')
         response = FileResponse(file_handle, content_type='application/pdf')

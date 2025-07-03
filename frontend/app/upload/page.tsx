@@ -203,7 +203,7 @@ export default function Upload() {
                 <option value="none">No Processing</option>
                 <option value="grayscale">Convert to Grayscale</option>
                 <option value="resolution">Enhance Resolution</option>
-                <option value="compress">Compress Image</option>
+                {/* <option value="compress">Compress Image</option> */}
               </select>
             </div>
 

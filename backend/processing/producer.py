@@ -1,5 +1,3 @@
-# api/worker_queue.py
-
 import threading
 import requests
 import time
