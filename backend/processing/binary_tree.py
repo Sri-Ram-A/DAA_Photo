@@ -44,4 +44,27 @@ class BinarySearchTree:
             return self._search_recursive(node.left, key)
         else:
             return self._search_recursive(node.right, key)
+    
+    def visualize(self, filename="bst"):
+        from graphviz import Digraph
+        dot = Digraph(comment='Binary Search Tree')
+        self._add_nodes_edges(self.root, dot)
+        dot.render(f'{filename}.gv', view=True)
+        print(f"✅ BST visualization saved to {filename}.gv.pdf ")
+        return filename+".gv"+".pdf"
 
+    def _add_nodes_edges(self, node, dot, parent_key=None):
+        if node:
+            # Create a label string showing key and meta data nicely
+            meta_text = "\\n".join(f"{k}: {v}" for k, v in node.meta.items())
+            label = f"{node.key}\\n{meta_text}"
+            # Add node
+            dot.node(node.key, label)
+            # Add edge from parent to this node
+            if parent_key:
+                dot.edge(parent_key, node.key)
+            # Recurse left and right
+            self._add_nodes_edges(node.left, dot, node.key)
+            self._add_nodes_edges(node.right, dot, node.key)
+
+    

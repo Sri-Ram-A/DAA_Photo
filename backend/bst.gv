@@ -1,0 +1,16 @@
+// Binary Search Tree
+digraph {
+	b09cd92766318edb [label="b09cd92766318edb\npHash: b09cd92766318edb\ntitle: 1\ndescription: 1\ncreator: 1\nuploaded_at: 2025-07-03 10:58:58.877510+00:00\nprocessing_type: none"]
+	abae54959b5624ab [label="abae54959b5624ab\npHash: abae54959b5624ab\ntitle: 2\ndescription: 2\ncreator: 2\nuploaded_at: 2025-07-03 11:06:06.627948+00:00\nprocessing_type: none"]
+	b09cd92766318edb -> abae54959b5624ab
+	"96925b3b9396caca" [label="96925b3b9396caca\npHash: 96925b3b9396caca\ntitle: dct\ndescription: dct\ncreator: dct\nuploaded_at: 2025-07-03T12:34:51.972670+00:00\nprocessing_type: resolution"]
+	abae54959b5624ab -> "96925b3b9396caca"
+	b6085de3368f631d [label="b6085de3368f631d\npHash: b6085de3368f631d\ntitle: Possible Frontend\ndescription: Fathima Frontend Functioning\ncreator: Frontend Fathima\nuploaded_at: 2025-07-03 11:01:10.958200+00:00\nprocessing_type: none"]
+	b09cd92766318edb -> b6085de3368f631d
+	d36d323e85cd9278 [label="d36d323e85cd9278\npHash: d36d323e85cd9278\ntitle: 3\ndescription: 3\ncreator: 3\nuploaded_at: 2025-07-03T11:59:49.790900+00:00\nprocessing_type: none"]
+	b6085de3368f631d -> d36d323e85cd9278
+	dc88fce4e0f191d9 [label="dc88fce4e0f191d9\npHash: dc88fce4e0f191d9\ntitle: 4\ndescription: 4\ncreator: 4\nuploaded_at: 2025-07-03T12:03:58.439368+00:00\nprocessing_type: none"]
+	d36d323e85cd9278 -> dc88fce4e0f191d9
+	ead62db4c338c4bc [label="ead62db4c338c4bc\npHash: ead62db4c338c4bc\ntitle: Utsarga Map\ndescription: Utaapam\ncreator: Utsagam\nuploaded_at: 2025-07-03T13:32:52.469107+00:00\nprocessing_type: grayscale"]
+	dc88fce4e0f191d9 -> ead62db4c338c4bc
+}

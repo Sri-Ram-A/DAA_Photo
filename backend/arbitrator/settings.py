@@ -131,7 +131,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT =  BASE_DIR / 'media'
 
-USE_MINIO=True # most important line
+USE_MINIO=False # most important line
 
 
 ###__________CORSHEADERS_________(https://pypi.org/project/django-cors-headers/)

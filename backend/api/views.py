@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from django.http import HttpResponse
+from django.http import HttpResponse,FileResponse
 from django.apps import apps
 tree = apps.get_app_config("api").tree
 import cv2
@@ -92,3 +92,13 @@ class CreatePost(APIView):
                 print(f"‼️ Key {pHash} already found in tree.")
                 return Response({"error":"image existing"},status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VisualizeTreeDatabase(APIView):
+    def get(self,request):
+        filename=tree.visualize()
+        
+        # Open the PDF file in binary mode
+        file_handle = open(filename, 'rb')
+        response = FileResponse(file_handle, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="tree_visualization.pdf"'
+        return response
