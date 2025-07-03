@@ -14,7 +14,8 @@ docker-compose up --build
 
 
 so this project is about how I and my team of 4 did a Image Coud Storage Platform using docker,This s what i did
-i used django rest framework to build the backend,to connect minio with django i used django-minio-backend
+i used django rest framework to build the backend,to connect minio with django i used django-minio-backend python package,next  i made a frontend using next js
+Now for huffman encoding i performed huffman encoding and stored the bitstring and shape as a string using json.dumps and thrn stored it as 
 https://www.docker.com/blog/how-to-dockerize-django-app/
 You can build the Django Docker container with the following command:
 
