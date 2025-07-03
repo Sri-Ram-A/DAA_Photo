@@ -2,3 +2,4 @@ venv/
 __pycache__/
 media/
 minio_data/
+db.sqlite3
