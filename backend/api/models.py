@@ -24,11 +24,7 @@ class Posts(models.Model):
     creator =  models.CharField(max_length=80, blank=False, null=False)
     title = models.CharField(max_length=80, blank=False, null=False)
     description = models.TextField()
-    image_url = models.ImageField(
-        upload_to=upload_to,
-        blank=True, null=True,
-        storage=storage
-        )
+    image_url = models.ImageField(upload_to=upload_to,blank=True, null=True,storage=storage)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     phash = models.CharField(max_length=16, blank=True, null=True)
     meta = models.TextField(null=False,default="{}")

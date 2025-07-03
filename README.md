@@ -13,7 +13,8 @@ cd project_a
 docker-compose up --build
 
 
-
+so this project is about how I and my team of 4 did a Image Coud Storage Platform using docker,This s what i did
+i used django rest framework to build the backend,to connect minio with django i used django-minio-backend
 https://www.docker.com/blog/how-to-dockerize-django-app/
 You can build the Django Docker container with the following command:
 
