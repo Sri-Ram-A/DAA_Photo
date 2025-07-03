@@ -58,6 +58,13 @@ class CreatePost(APIView):
             encoded_dict=preprocess.image_encoding(img)
             instance.meta=json.dumps(encoded_dict)
             
+            if instance.processing_type == "grayscale":
+                print("Do grayscale things")
+            elif instance.processing_type == "resolution":
+                print("Do resolution enhancement")
+            else:
+                print("No extra processing")
+            
             instance.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

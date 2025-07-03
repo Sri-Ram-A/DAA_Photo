@@ -16,6 +16,11 @@ def upload_to(instance, filename):
     return f'images/{filename}' 
 
 class Posts(models.Model):
+    PROCESSING_CHOICES = [
+        ('none', 'None'),
+        ('grayscale', 'Grayscale'),
+        ('resolution', 'Resolution'),
+    ]
     creator =  models.CharField(max_length=80, blank=False, null=False)
     title = models.CharField(max_length=80, blank=False, null=False)
     description = models.TextField()
@@ -27,6 +32,7 @@ class Posts(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     phash = models.CharField(max_length=16, blank=True, null=True)
     meta = models.TextField(null=False,default="{}")
+    processing_type = models.CharField(max_length=20, choices=PROCESSING_CHOICES, default='none')
 
     def __str__(self):
         return f"{self.title} by {self.creator}"

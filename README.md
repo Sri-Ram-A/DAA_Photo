@@ -9,6 +9,10 @@ field=models.ImageField(blank=True, null=True, storage=django_minio_backend.mode
 
 python manage.py makemigrations api
 
+cd project_a
+docker-compose up --build
+
+
 
 https://www.docker.com/blog/how-to-dockerize-django-app/
 You can build the Django Docker container with the following command:

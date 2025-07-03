@@ -6,16 +6,8 @@ import { getImages } from "@/services"
 import HeroSection from "@/components/HeroSection"
 import Modal from "@/components/Modal"
 import { User, Calendar, Hash, Zap, Eye } from "lucide-react"
+import { ImageData } from "@/types"
 
-interface ImageData {
-    id: number
-    title: string
-    description: string
-    image_url: string
-    uploaded_at: string
-    creator: number
-    phash: string
-}
 
 export default function View() {
     const [images, setImages] = useState<ImageData[]>([])
@@ -60,7 +52,7 @@ export default function View() {
 
             <div className="relative z-10">
                 <HeroSection />
-                
+
                 <div className="flex items-center justify-center text-center mb-12">
                     <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-full px-6 py-3 mb-6">
                         <Zap className="w-5 h-5 text-blue-400" />
@@ -109,12 +101,29 @@ export default function View() {
                                         </div>
                                     )}
 
-                                    <div className="absolute top-3 left-3">
-                                        <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md rounded-full px-3 py-1.5 border border-blue-500/30">
+                                    <div className="absolute top-3 left-3 flex items-center gap-2">
+                                        {/* Creator badge */}
+                                        <div className="flex items-center gap-1 bg-slate-900/80 backdrop-blur-md rounded-full px-3 py-1.5 border border-blue-500/30">
                                             <User className="w-3 h-3 text-blue-400" />
                                             <span className="text-blue-300 text-xs font-medium">Creator {image.creator}</span>
                                         </div>
+
+                                        {/* Processing type badge */}
+                                        <span
+                                            className={`
+                                                     text-white text-xs font-semibold px-2 py-1 rounded 
+                                                     ${image.processing_type === "grayscale"
+                                                    ? "bg-gray-500"
+                                                    : image.processing_type === "resolution"
+                                                        ? "bg-cyan-500"
+                                                        : "bg-green-600"}
+    `}
+                                        >
+                                            {image.processing_type}
+                                        </span>
                                     </div>
+
+
 
                                     <div className="absolute top-3 right-3">
                                         <div className="bg-purple-500/20 backdrop-blur-md rounded-full p-2 border border-purple-500/30">
@@ -164,7 +173,7 @@ export default function View() {
                         <div className="text-center py-20">
                             <div className="inline-flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm rounded-full px-6 py-3 border border-slate-700/50">
                                 <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                                <span className="text-slate-300">Initializing Neural Network...</span>
+                                <span className="text-slate-300">Initializing Image Network...</span>
                             </div>
                         </div>
                     )}
