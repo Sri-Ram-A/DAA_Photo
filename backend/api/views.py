@@ -14,8 +14,6 @@ from processing import preprocess
 from processing import producer
 from . import serializers,models
 
-
-
 # Create your views here.
 class HelloWorld(APIView):
     def get(self,request):
