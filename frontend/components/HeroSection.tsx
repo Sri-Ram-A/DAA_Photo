@@ -4,104 +4,42 @@ import { redirect } from "next/navigation"
 
 export default function HeroSection() {
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "2rem",
-                padding: "2rem",
-                maxWidth: "1200px",
-                margin: "0 auto",
-               
-            }}
-        >
+        <div className="flex justify-center gap-8 p-8 max-w-[1200px] mx-auto">
             {/* Left div: Hero Text, slightly wider */}
-            <div
-                style={{
-                    flex: 2,
-                    background: "#f5f5f5",
-                    padding: "2rem",
-                    borderRadius: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                }}
-            >
-                <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+            <div className="flex-2 bg-gray-50 p-8 rounded-xl flex flex-col justify-center items-start">
+                <h1 className="text-4xl font-bold mb-2">
                     Cloud Image Orchestrator
                 </h1>
-                <p style={{ fontSize: "1rem", color: "#555" }}>
-                    The platform for your images - hashing , huffman , housekeeping and more<br />
+                <p className="text-base text-gray-600">
+                    The platform for your images - hashing, huffman, housekeeping and more<br />
                 </p>
             </div>
 
             {/* Middle div: Square with small border */}
-            <div
-                style={{
-                    flex: 1,
-                    aspectRatio: "1 / 1",
-                    border: "1px solid #ddd",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
+            <div className="flex-1 aspect-square border border-gray-300 rounded-xl overflow-hidden flex items-center justify-center">
                 <Image
                     src="/bg5.jpg"
                     alt="Middle image"
                     width={300}
                     height={300}
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                    }}
+                    className="w-full h-full object-cover"
                 />
             </div>
 
             {/* Right div: Square with image + button */}
-            <div
-                style={{
-                    flex: 1,
-                    aspectRatio: "1 / 1",
-                    border: "1px solid #ddd",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "1rem",
-                }}
-            >
+            <div className="flex-1 aspect-square border border-gray-300 rounded-xl overflow-hidden flex flex-col items-center justify-between p-4">
                 <Image
                     src="/bg4.jpg"
                     alt="Right image"
                     width={300}
                     height={200}
-                    style={{
-                        width: "100%",
-                        height: "auto",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                    }}
+                    className="w-full h-auto object-cover rounded-lg"
                 />
                 <button
-                    style={{
-                        marginTop: "auto",
-                        padding: "10px 16px",
-                        borderRadius: "8px",
-                        border: "none",
-                        background: "#111",
-                        color: "#fff",
-                        cursor: "pointer",
-                        width: "100%",
-                    }}
+                    className="mt-auto py-2.5 px-4 rounded-lg border-none bg-black text-white cursor-pointer w-full"
                     onClick={() => { redirect("upload/") }}
-                >Begin The Journey
+                >
+                    Begin The Journey
                 </button>
             </div>
         </div>
