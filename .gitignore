@@ -3,3 +3,5 @@ __pycache__/
 media/
 minio_data/
 backend/db.sqlite3
+phash/uploads
+images_code/
