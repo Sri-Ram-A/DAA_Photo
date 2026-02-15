@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='posts',
             name='image_url',
-            field=models.ImageField(blank=True, null=True, storage=django_minio_backend.models.MinioBackend(bucket_name='media', replace_existing=True), upload_to=api.models.upload_to),
+            field=models.ImageField(blank=True, null=True, upload_to=api.models.upload_to),
         ),
     ]

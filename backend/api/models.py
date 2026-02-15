@@ -1,12 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django_minio_backend import MinioBackend
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 # Create your models here.
 # lets us explicitly set upload path and filename
-USE_MINIO=getattr(settings,"USE_MINIO",False)
-storage=MinioBackend(bucket_name='media', replace_existing=True) if USE_MINIO else FileSystemStorage()
+
 # 🌟✨observation:
 # if USE_MINIO=True,every image_url in every Posts object = http://127.0.0.1:9000/media/images/wallhaven-1.jpg
 # if USE_MINIO=False every image_url in every Posts object = http://127.0.0.1:8000/media/images/wallhaven-1_-_minio.jpg
@@ -24,7 +19,7 @@ class Posts(models.Model):
     creator =  models.CharField(max_length=80, blank=False, null=False)
     title = models.CharField(max_length=80, blank=False, null=False)
     description = models.TextField()
-    image_url = models.ImageField(upload_to=upload_to,blank=True, null=True,storage=storage)
+    image_url = models.ImageField(upload_to=upload_to,blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     phash = models.CharField(max_length=16, blank=True, null=True)
     meta = models.TextField(null=False,default="{}")

@@ -8,14 +8,16 @@ class ApiConfig(AppConfig):
     ### BELOW ADDED BY ME
     def ready(self):
         
-        #For MINIO Database
-        minio = MinioBackend()
-        result = minio.is_minio_available()
-        if result:
-            logger.info("✅ MinIO is available.")
-        else:
-            logger.info(f"❌ MinIO is not available. Using File system storage\n{result.details}")
+        # #For MINIO Database
+        # minio = MinioBackend()
+        # result = minio.is_minio_available()
+        # if result:
+        #     logger.info("✅ MinIO is available.")
+        # else:
+        #     logger.info(f"❌ MinIO is not available. Using File system storage\n{result.details}")
             
         #For BST Database
         self.tree = preprocess.load_tree()
         logger.success("✅ Tree loaded and ready!")
+
+        

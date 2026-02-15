@@ -5,3 +5,4 @@ djangorestframework==3.16.0
 numpy==2.2.5
 sqlparse==0.5.3
 tzdata==2025.2
+django-minio-backend

@@ -126,12 +126,12 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ### BELOW LINES ARE ADDED BY ME 
-    ###__________LOCAL_DJANGO_________(https://medium.com/django-unleashed/working-and-configuring-media-files-in-django-0c2fa7b97a1e)
+###__________LOCAL_DJANGO_________(https://medium.com/django-unleashed/working-and-configuring-media-files-in-django-0c2fa7b97a1e)
     
 MEDIA_URL = '/media/'
 MEDIA_ROOT =  BASE_DIR / 'media'
 
-USE_MINIO=True # most important line
+USE_MINIO=False # most important line
 
 
 ###__________CORSHEADERS_________(https://pypi.org/project/django-cors-headers/)
@@ -144,7 +144,7 @@ CORS_ALLOWED_ORIGINS = [
 
 ###__________MINIO_________(https://pypi.org/project/django-minio-backend/)
 if USE_MINIO:
-    INSTALLED_APPS.append('django_minio_backend')###https://pypi.org/project/django-minio-backend/
+    INSTALLED_APPS.append('django_minio_backend') ### https://pypi.org/project/django-minio-backend/
     # if you remove above line,inspite of running minio server,it will not work
     DEFAULT_FILE_STORAGE = 'django_minio_backend.models.MinioBackend'
     from typing import List, Tuple
@@ -157,16 +157,16 @@ if USE_MINIO:
         },
     }
 
-    MINIO_ENDPOINT = '127.0.0.1:9000' #Docker running at
-    MINIO_ACCESS_KEY = 'minioadmin' #My MINIO username
-    MINIO_SECRET_KEY = 'minioadmin' #My MINIO password 
+    MINIO_ENDPOINT = '127.0.0.1:9000' # Docker running at
+    MINIO_ACCESS_KEY = 'minioadmin' # My MINIO username
+    MINIO_SECRET_KEY = 'minioadmin' # My MINIO password 
 
-    MINIO_PUBLIC_BUCKETS = ['media','static'] #Buckets for media and static files
+    MINIO_PUBLIC_BUCKETS = ['media','static'] # Buckets for media and static files
     MINIO_MEDIA_FILES_BUCKET = 'media'  # replacement for MEDIA_ROOT
     MINIO_STATIC_FILES_BUCKET = 'static'  # replacement for STATIC_ROOT
     MINIO_POLICY_HOOKS: List[Tuple[str, dict]] = []
 
-    MINIO_USE_HTTPS=False #Mandatiry parameter
+    MINIO_USE_HTTPS=False # Mandatiry parameter
     MINIO_BUCKET_CHECK_ON_SAVE = True  # Default: Autocreates bucket if not present
     MINIO_CONSISTENCY_CHECK_ON_START = True #Health & consistency check
 
